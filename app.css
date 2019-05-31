@@ -1,0 +1,181 @@
+body {
+    text-align: center;
+}
+
+div {
+    box-sizing: border-box;
+}
+
+.logo {
+    height: 30px;
+}
+
+.logo-name {
+    vertical-align: middle;
+    margin-right: 40px;
+}
+
+.login {
+    width: 500px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.app {
+    width: 500px;
+    margin: 0 auto;
+}
+
+.record-list {
+    display: inline-flex;
+    width: 100%;
+}
+
+.record-list .records-selector {
+    flex: 1 1 auto;
+}
+
+.record-list .btn {
+    flex: 0 1 auto;
+    margin-left: 5px;
+    min-width: 36px;
+}
+
+.days-remaining {
+    font-size: 60px;
+    display: block;
+}
+
+.results {
+    text-align: center;
+    display: block;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 5px;
+    background-color: #eee;
+}
+
+.username {
+    margin-right: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.notOption {
+    visibility: hidden;
+}
+
+ul.timeline .stage {
+    text-transform: capitalize;
+}
+
+.navbar {
+    margin-bottom: 40px;
+}
+
+.choices {
+    display: inline-grid;
+    grid-template-columns: 200px 200px;
+    grid-template-rows: 200px 200px;
+    grid-gap: 30px;
+}
+
+.choices > div {
+    height: 200px;
+    width: 200px;
+    background-color: gray;
+    margin: 0 auto;
+    background-size: cover;
+    background-position: center center;
+    color: white;
+    text-transform: capitalize;
+    text-shadow: 0 3px 5px #000, 0 3px 10px #000;
+    display: flex;
+    align-items: end;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.name-container {
+    margin-bottom: 20px;
+}
+
+#record-name {
+    text-align: center;
+}
+
+.pie-overlay-container {
+    position: relative;
+    height: 0;
+}
+
+.days-remaining-container {
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: -10000;
+}
+
+.pie-container {
+    height: 300px;
+    z-index: 10000;
+}
+
+/* Timeline code. Slightly modified. Source: https://bootsnipp.com/snippets/xrKXW */
+ul.timeline {
+    list-style-type: none;
+    position: relative;
+    text-align: left;
+}
+
+ul.timeline:before {
+    content: ' ';
+    background: #d4d9df;
+    display: inline-block;
+    position: absolute;
+    left: 29px;
+    width: 2px;
+    height: 100%;
+    z-index: 400;
+}
+
+ul.timeline > li {
+    margin: 20px 0;
+    padding-left: 20px;
+}
+
+ul.timeline > li:before {
+    content: ' ';
+    background: white;
+    display: inline-block;
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid #22c0e8;
+    left: 20px;
+    width: 20px;
+    height: 20px;
+    z-index: 400;
+}
+
+ul.timeline > li.inflorescence:before {
+    border-color: #4CAF50;
+}
+ul.timeline > li.flowering:before {
+    border-color: #2196F3;
+    border-width: 5px;
+}
+ul.timeline > li.berry-development:before {
+    border-color: #FFEB3B;
+    border-width: 7px;
+}
+ul.timeline > li.berry-ripening:before {
+    border-color: #F44336;
+    border-width: 9px;
+}
+ul.timeline > li.predicted-harvest-date:before {
+    border-color: #A0522D;
+    border-width: 10px;
+}

@@ -1,0 +1,257 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://www.gstatic.com/firebasejs/5.11.0/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <style>
+        .form-control, .form-control-file {
+            display: inline-block;
+            max-width: 300px;
+        }
+
+        .form-control-file {
+            text-align: center;
+        }
+
+        body {
+            text-align: center;
+            font-family: "Open Sans Light", "Open Sans", sans-serif;
+            font-weight: 300;
+        }
+
+        h2 {
+            font-wight: 300;
+            margin: 0;
+            margin-bottom: 50px;
+        }
+
+        .container {
+            background-color: #eee;
+            width: 1000px;
+            margin: 40px auto;
+            padding: 50px 20px;
+        }
+
+        input {
+            display: inline-block;
+            margin: 3px auto;
+            padding: 5px;
+            border-radius: 2px;
+            border: none;
+        }
+
+        input, .container > button, select {
+            min-width: 150px;
+        }
+
+        button.btn {
+            vertical-align: baseline;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="#">
+        Caphe Weather Data Uploader
+    </a>
+</nav>
+
+<div class="toast-container" style="position: absolute; top: 20px; right: 20px;">
+</div>
+
+
+<div class="location-container container">
+    <h2>Create Location</h2>
+    <input class="form-control" type="text" id="location" placeholder="ID"/>
+    <input class="form-control" type="text" id="location-name" placeholder="Name"/>
+    <button id="add-location" class="btn btn-primary" onClick="addLocationClicked()">Add/Update Location</button>
+</div>
+<div class="temperature-upload-container container">
+    <h2>Temperature Data Upload</h2>
+    <select class="form-control" name="location-list" id="location-list"></select>
+    <button id="delete" class="btn btn-danger" onclick="deleteSelectedLocation()">Delete</button>
+    <br/>
+    <input class="form-control-file" type="file" id="file"/>
+    <br/>
+    <button onclick="buttonClicked()" class="btn btn-primary" id="upload">Upload</button>
+</div>
+<div class="berry-upload-container container">
+    <h2>Berry Data Upload</h2>
+    <select class="form-control" name="berry-location-list" id="berry-location-list"></select>
+    <br>
+    <input class="form-control-file" type="file" id="file2"/>
+    <br/>
+    <button onclick="berryButtonClicked()" class="btn btn-primary" id="upload2">Upload</button>
+</div>
+
+<script>
+    var firebaseConfig = {
+        apiKey: "AIzaSyDAP5bsQk9IYpBbvUVQqvI7d4RqYh5Xdqs",
+        authDomain: "baby-names-app-db-f5128.firebaseapp.com",
+        databaseURL: "https://baby-names-app-db-f5128.firebaseio.com",
+        projectId: "baby-names-app-db-f5128",
+        storageBucket: "baby-names-app-db-f5128.appspot.com",
+        messagingSenderId: "398460116167"
+    };
+
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const locationListElement = $('#location-list');
+    const berryLocationListElement = $('#berry-location-list');
+    const locationNameElement = $('#location-name');
+    const locationElement = $('#location');
+    const toastContainerElement = $('.toast-container');
+    $('.toast').toast('show');
+
+    let weatherData = {};
+
+    db.collection('model').doc('weatherData').onSnapshot(snapshot => {
+        locationListElement.html('');
+        berryLocationListElement.html('');
+        weatherData = snapshot.data();
+        for (let key in weatherData) {
+            locationListElement.append(`<option value="${key}">${weatherData[key].name || 'Untitled: ' + key}</option>`);
+        }
+        for (let key in weatherData) {
+            berryLocationListElement.append(`<option value="${key}">${weatherData[key].name || 'Untitled: ' + key}</option>`);
+        }
+    });
+
+    function showToast(title, message, delay=5000) {
+        const toastElement = $(`
+            <div class="toast" >
+                <div class="toast-header">
+                    <strong class="mr-auto">${title}</strong>
+                     <small></small>
+                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="toast-body">
+                    ${message}
+                </div>
+            </div>
+        `);
+        toastElement.appendTo(toastContainerElement)
+        toastElement.toast({animation: true, autohide: true, delay: delay});
+        toastElement.toast('show');
+    }
+
+
+    function deleteSelectedLocation() {
+        const selectedLocation = locationListElement.val();
+        if (confirm('Are you sure you want to delete ' + selectedLocation)) {
+            db.collection('model').doc('weatherData').update({
+                [selectedLocation]: firebase.firestore.FieldValue.delete()
+            })
+                .then(() => showToast('Location', 'Successfully deleted'))
+                .catch(error => {
+                    console.log(error);
+                    showToast('Location', 'Failed to delete');
+                });
+        }
+    }
+
+
+    function addLocationClicked() {
+        const location = locationElement.val();
+        const locationName = locationNameElement.val();
+        db.collection('model').doc('weatherData').set({[location]: {name: locationName}}, {merge: true})
+            .then(() => {
+                showToast('Location', 'Successfully created/updated');
+                locationElement.val('');
+                locationNameElement.val('');
+            })
+            .catch(error => {
+                showToast('Location', 'Failed to create/update');
+            })
+    }
+
+    //weather
+    function setAsWeatherData(data) {
+        console.log('writing');
+        db.collection('model').doc('weatherData').update(data)
+            .then(function () {
+                console.log('Document written.');
+                showToast('Weather Data', 'Weather/Berry data successfully uploaded!');
+            })
+            .catch(function (error) {
+                console.error('Error adding document: ', error);
+                showToast('Weather Data', 'Upload failed!');
+            });
+    }
+
+    function buttonClicked() {
+        const fileInput = document.getElementById('file');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        // Closure to capture the file information.
+        reader.onload = (data) => {
+            const content = data.target.result;
+            const temperatures = parseWeatherData(content);
+            const selectedLocation = locationListElement.val();
+            setAsWeatherData({[selectedLocation]: {...weatherData[selectedLocation], temperatures}});
+        };
+
+        reader.readAsBinaryString(file);
+    }
+
+    function parseWeatherData(data) {
+        let result = [];
+        const lines = data.split('\n');
+
+        lines.forEach(line => {
+            [date, minTemp, maxTemp] = line.trim().split(',');
+            result.push({date: new Date(date), minTemp: parseFloat(minTemp), maxTemp: parseFloat(maxTemp)});
+        });
+
+        return result;
+    }
+
+
+    function berryButtonClicked() {
+        const fileInput = document.getElementById('file2');
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+
+        // Closure to capture the file information.
+        reader.onload = (data) => {
+            const content = data.target.result;
+            const berries = parseBerryData(content);
+            const selectedLocation = berryLocationListElement.val();
+            setAsWeatherData({[selectedLocation]: {...weatherData[selectedLocation], berries}});
+        };
+
+        reader.readAsBinaryString(file);
+    }
+
+    function parseBerryData(data) {
+        let result = {
+            robusta: {},
+            arabica: {},
+            excelsa: {},
+            liberica: {}
+        };
+        const lines = data.split('\n');
+
+        lines.forEach(line => {
+            const [bbch, robusta, arabica, excelsa, liberica] = line.trim().split(',');
+            const bbchInt = parseInt(bbch);
+            result.robusta[bbchInt] = parseFloat(robusta);
+            result.arabica[bbchInt] = parseFloat(arabica);
+            result.excelsa[bbchInt] = parseFloat(excelsa);
+            result.liberica[bbchInt] = parseFloat(liberica);
+        });
+
+        return result;
+    }
+</script>
+</body>
+</html>
