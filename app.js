@@ -29,7 +29,7 @@ const stages = [
     {name: 'inflorescence', choices: [51, 53, 55, 57,59]},
     {name: 'flowering', choices: [61, 65, 69]},
     {name: 'berry development', choices: [71, 73, 75, 77,79]},
-    {name: 'berry ripening', choices: [ 81, 85, 88]}
+    {name: 'berry ripening', choices: [ 81, 85]}
 ];
 const chartDefaults = {
     type: 'doughnut',
@@ -62,7 +62,7 @@ const chartDefaults = {
                     const index = tooltipItem.index;
                     const label = dataset.labels[index];
                     //const isProgress = ['progress', 'remaining'].includes(label.toLowerCase())
-                    //return label + (isProgress ? (': ' + Math.round(dataset.data[index]) + '%') : ''); This was decided to be too tedious to do and probably erroneous. bale kasi % eh di dapat ganun... since even tougth may days from previous data, di naman necesarrily un din ung lalabas na days. 
+                    //return label + (isProgress ? (': ' + Math.round(dataset.data[index]) + '%') : ''); This was decided to be too tedious to do and probably erroneous. bale kasi % eh di dapat ganun... since even tougth may days from previous data, di naman necesarrily un din ung lalabas na days.
                     return label;
                 }
             }
@@ -81,6 +81,7 @@ async function onApplicationStart() {
         elements = {
             app: $('.app'),
             daysRemainingContainer: $('.days-remaining-container'),
+            daysRemainingMessage: $('.days-remaining-message'),
             daysRemaining: $('.days-remaining'),
             errorContainer: $('.error-container'),
             logout: $('.logout'),
@@ -96,7 +97,8 @@ async function onApplicationStart() {
             deleteButton: $('.delete-button'),
             locationList: $('#location-list'),
             locationListWarning: $('.location-list-warning'),
-            pie: $('.pie')
+            pie: $('.pie'),
+            pieOverlay: $('.pie-overlay-container')
         };
 
         data.chart = new Chart(elements.pie[0].getContext('2d'), chartDefaults);
@@ -187,6 +189,9 @@ function onRecordChanged(record) {
         elements.errorContainer.removeClass('hidden');
         elements.timeline.addClass('hidden');
         elements.daysRemainingContainer.addClass('hidden');
+        elements.daysRemainingMessage.addClass('hidden');
+        elements.pieOverlay.addClass('hidden');
+
         elements.errorContainer.text('No records found. Press the + button to add a record.');
         return;
     }
@@ -197,8 +202,12 @@ function onRecordChanged(record) {
     data.selectedRecord = record;
     const result = calculate(record);
 
+    console.log(result);
+
     if (result.daysLeft < 0) {
         elements.daysRemainingContainer.addClass('hidden');
+        elements.daysRemainingMessage.addClass('hidden');
+        elements.pieOverlay.addClass('hidden');
         elements.timeline.addClass('hidden');
         elements.errorContainer.removeClass('hidden');
 
@@ -209,6 +218,8 @@ function onRecordChanged(record) {
     elements.errorContainer.addClass('hidden');
     elements.timeline.removeClass('hidden');
     elements.daysRemainingContainer.removeClass('hidden');
+    elements.daysRemainingMessage.removeClass('hidden');
+    elements.pieOverlay.removeClass('hidden');
 
     elements.timeline.html('');
     for (let event of result.events) {
@@ -325,6 +336,11 @@ function incrementAddModalStage(lastChoice) {
                     .css('background-image', `url(assets/${data.addModal.record.species}/${lastChoice.replace(/ /g, '')}${index + 1}.jpeg)`).removeClass('notOption');
             }
             if(stageData.choices.length<4){
+              elements.choices[3].addClass('notOption');
+              elements.choices[4].addClass('notOption');
+            }
+            if(stageData.choices.length<3){
+              elements.choices[2].addClass('notOption');
               elements.choices[3].addClass('notOption');
               elements.choices[4].addClass('notOption');
             }

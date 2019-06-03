@@ -1,5 +1,6 @@
 function calculate(record) {
-    const inputDateString = moment(data['date']).format('YYYY-MM-DD');
+  console.log(record);
+    const inputDateString = moment(record['date'].toDate()).format('YYYY-MM-DD');
     const todayString = moment().format('YYYY-MM-DD');
     const weather = data.weather[record.location];
     const speciesData = weather['berries'][record.species.toLowerCase()];
@@ -59,6 +60,10 @@ function calculate(record) {
     }
 
     result.daysLeft = moment(result.harvestDate).startOf('day').diff(moment().startOf('day'), 'day');
+
+    if (result.daysLeft < 0) {
+      result.daysLeft = 0;
+    }
 
     return result;
 }
